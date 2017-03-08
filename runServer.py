@@ -25,6 +25,7 @@ define('port', default=12000, help='run on the given port', type=int)
 define('loglevel', default='debug', help='log level')
 define('debug', default=True, help='run in debug mode')
 
+MAX_WAIT_SECONDS_BEFORE_SHUTDOWN = 10
 
 class DBApplication(tornado.web.Application):
     def __init__(self, handlers, **settings):
@@ -55,14 +56,14 @@ def sig_handler(sig, frame):
     logging.warning('Caught signal: %s', sig)
     tornado.ioloop.IOLoop.instance().add_callback_from_signal(shutdown)
 
-def shutdown(self):
+def shutdown():
     logging.info('Stopping http server')
     httpServer.stop()  # 不接收新的 HTTP 请求
 
-    logging.info('Will shutdown in %s seconds ...', settings.MAX_WAIT_SECONDS_BEFORE_SHUTDOWN)
+    logging.info('Will shutdown in %s seconds ...', MAX_WAIT_SECONDS_BEFORE_SHUTDOWN)
     io_loop = tornado.ioloop.IOLoop.instance()
 
-    deadline = time.time() + settings.MAX_WAIT_SECONDS_BEFORE_SHUTDOWN
+    deadline = time.time() + MAX_WAIT_SECONDS_BEFORE_SHUTDOWN
 
     def stop_loop():
         now = time.time()
