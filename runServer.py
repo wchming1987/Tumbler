@@ -4,7 +4,9 @@
 import ConfigParser
 import logging
 import os.path
+import signal
 import sys
+import time
 
 import tornado.autoreload
 import tornado.httpserver
@@ -42,9 +44,36 @@ class DBApplication(tornado.web.Application):
                 config.get('database', 'dbuser'),
                 config.get('database', 'dbpassword')
             )
+
+            signal.signal(signal.SIGTERM, self.sig_handler)
+            signal.signal(signal.SIGINT, self.sig_handler)
+
         except Exception, ex:
             print ex
             exit(-1)
+
+    def sig_handler(self, sig, frame):
+        logging.warning('Caught signal: %s', sig)
+        tornado.ioloop.IOLoop.instance().add_callback_from_signa(self.shutdown)
+
+    def shutdown(self):
+        logging.info('Stopping http server')
+        self.stop()  # 不接收新的 HTTP 请求
+
+        logging.info('Will shutdown in %s seconds ...', settings.MAX_WAIT_SECONDS_BEFORE_SHUTDOWN)
+        io_loop = tornado.ioloop.IOLoop.instance()
+
+        deadline = time.time() + settings.MAX_WAIT_SECONDS_BEFORE_SHUTDOWN
+
+        def stop_loop():
+            now = time.time()
+            if now < deadline and (io_loop._callbacks or io_loop._timeouts):
+                io_loop.add_timeout(now + 1, stop_loop)
+            else:
+                io_loop.stop()  # 处理完现有的 callback 和 timeout 后，可以跳出 io_loop.start() 里的循环
+                logging.info('Shutdown')
+
+        stop_loop()
 
 handlers = [
     (r'/books', BooksHandler),
@@ -85,8 +114,12 @@ if __name__ == '__main__':
 
     webApp = DBApplication(handlers, **settings)
     httpServer = tornado.httpserver.HTTPServer(webApp)
-    httpServer.listen(options.port)
+    httpServer.bind(options.port)
 
-    loop = tornado.ioloop.IOLoop.instance()
-    tornado.autoreload.start(loop)
-    loop.start()
+    #loop = tornado.ioloop.IOLoop.instance()
+    #tornado.autoreload.start(loop)
+    #loop.start()
+
+    tornado.ioloop.IOLoop.instance().start()
+
+    logging.info('Exit')
