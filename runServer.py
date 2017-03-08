@@ -54,7 +54,7 @@ class DBApplication(tornado.web.Application):
 
     def sig_handler(self, sig, frame):
         logging.warning('Caught signal: %s', sig)
-        tornado.ioloop.IOLoop.instance().add_callback_from_signa(self.shutdown)
+        tornado.ioloop.IOLoop.instance().add_callback_from_signal(self.shutdown)
 
     def shutdown(self):
         logging.info('Stopping http server')
