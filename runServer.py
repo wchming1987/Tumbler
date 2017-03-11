@@ -14,6 +14,8 @@ import tornado.ioloop
 import tornado.web
 from tornado.options import define, options
 
+from tornado_swagger import swagger
+
 import pymongo
 
 from handlers import *
@@ -26,6 +28,12 @@ define('loglevel', default='debug', help='log level')
 define('debug', default=True, help='run in debug mode')
 
 MAX_WAIT_SECONDS_BEFORE_SHUTDOWN = 10
+DEFAULT_REPRESENTATION = "application/json"
+HTTP_BAD_REQUEST = 400
+HTTP_FORBIDDEN = 403
+HTTP_NOT_FOUND = 404
+
+swagger.docs()
 
 class DBApplication(tornado.web.Application):
     def __init__(self, handlers, **settings):

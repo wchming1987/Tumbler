@@ -49,3 +49,6 @@
 [I 170308 21:39:36 runServer:111] ---------------- Begin Start Server... ----------------
 [D 170308 21:39:36 runServer:112] LogLevel:[debug]
 [D 170308 21:39:36 runServer:113] LogFile:[E:/Alfred/src/Tumbler/Src/Tumbler\log\run.log]
+[I 170308 21:55:03 runServer:110] ---------------- Begin Start Server... ----------------
+[D 170308 21:55:03 runServer:111] LogLevel:[debug]
+[D 170308 21:55:03 runServer:112] LogFile:[E:/Alfred/src/Tumbler/Src/Tumbler\log\run.log]
