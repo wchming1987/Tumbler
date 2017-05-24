@@ -41,7 +41,7 @@ class DBApplication(tornado.web.Application):
 
         try:
             config = ConfigParser.SafeConfigParser()
-            path = os.path.join(os.path.dirname(__file__), 'config', 'db.ini')
+            path = os.path.join(os.path.dirname(__file__), 'config', 'db.conf')
             config.read(path)
 
             self.conn = pymongo.MongoClient(
