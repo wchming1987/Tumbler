@@ -2,7 +2,6 @@
 # -*- coding=utf-8 -*-
 
 import ConfigParser
-import logging
 import os
 import signal
 import time
@@ -12,6 +11,8 @@ import tornado.ioloop
 
 from tornado_swagger import swagger
 
+from lib import log
+
 from handler.Book import BooksHandler
 from handler.Reminder import RemindersHandler
 
@@ -20,7 +21,6 @@ import pymongo
 MAX_WAIT_SECONDS_BEFORE_SHUTDOWN = 5
 
 swagger.docs()
-
 
 @swagger.model()
 class PropertySubclass:
@@ -102,7 +102,7 @@ def make_app():
     ## TODO: 数据库、日志 等连接需要封装
     try:
         config = ConfigParser.SafeConfigParser()
-        path = os.path.join(os.path.dirname(__file__), 'config', 'db.ini')
+        path = os.path.join(os.path.dirname(__file__), 'config', 'db.conf')
         config.read(path)
 
         connection = pymongo.MongoClient(
@@ -129,16 +129,16 @@ def make_app():
 
 
 def sig_handler(sig, frame):
-    logging.warning('Caught signal: %s', sig)
+    log.logger.warning('Caught signal: %s', sig)
     tornado.ioloop.IOLoop.instance().add_callback_from_signal(shutdown)
 
 
 def shutdown():
-    logging.info('Stopping http server')
+    log.logger.info('Stopping http server')
 
     webApp.stop()  # 不接收新的 HTTP 请求
 
-    logging.info('Will shutdown in %s seconds ...', MAX_WAIT_SECONDS_BEFORE_SHUTDOWN)
+    log.logger.info('Will shutdown in %s seconds ...', MAX_WAIT_SECONDS_BEFORE_SHUTDOWN)
     io_loop = tornado.ioloop.IOLoop.instance()
 
     deadline = time.time() + MAX_WAIT_SECONDS_BEFORE_SHUTDOWN
@@ -149,7 +149,7 @@ def shutdown():
             io_loop.add_timeout(now + 1, stop_loop)
         else:
             io_loop.stop()  # 处理完现有的 callback 和 timeout 后，可以跳出 io_loop.start() 里的循环
-            logging.info('Shutdown')
+            log.logger.info('Shutdown')
 
     stop_loop()
 
@@ -163,4 +163,4 @@ if __name__ == "__main__":
 
     tornado.ioloop.IOLoop.current().start()
 
-    logging.info('Exit')
+    log.logger.info('Exit')
